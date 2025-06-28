@@ -1,13 +1,13 @@
 # 🛒 Fiber E-commerce API
 
-ระบบ E-commerce API ที่สมบูรณ์แบบ พัฒนาด้วย Go Fiber framework โดยใช้หลักการ Clean Architecture รองรับการจัดการสินค้า, ตะกร้าสินค้า, คำสั่งซื้อ, และการชำระเงิน
+ระบบ E-commerce API ที่สมบูรณ์แบบ พัฒนาด้วย Go Fiber framework โดยใช้หลักการ Clean Architecture รองรับการจัดการสินค้า, ตะกร้าสินค้า, คำสั่งซื้อ, การชำระเงิน และระบบสถิติ
 
 ## 🏗️ Architecture
 
 โปรเจ็กต์นี้ใช้หลักการ **Clean Architecture** มีโครงสร้างดังนี้:
 
 ```
-fiber-ecommerce-api/
+fiber-ecommerce-api-day8/
 ├── cmd/
 │   ├── api/                   # Application entry point
 │   │   └── main.go
@@ -17,19 +17,30 @@ fiber-ecommerce-api/
 │   ├── adapters/              # External adapters
 │   │   ├── http/              # HTTP layer (handlers, middleware, routes)
 │   │   │   ├── handlers/      # HTTP request handlers
-│   │   │   │   ├── auth_handler.go       # Authentication
-│   │   │   │   ├── user_handler.go       # User management
+│   │   │   │   ├── auth_handler.go       # Authentication & Users
+│   │   │   │   ├── user_handler.go       # User management (Admin)
 │   │   │   │   ├── category_handler.go   # Category management
 │   │   │   │   ├── product_handler.go    # Product management
 │   │   │   │   ├── cart_handler.go       # Shopping cart
 │   │   │   │   ├── order_handler.go      # Order management
 │   │   │   │   ├── payment_handler.go    # Payment processing
-│   │   │   │   └── stats_handler.go      # Statistics
+│   │   │   │   └── stats_handler.go      # Statistics & Analytics
 │   │   │   ├── middleware/    # HTTP middleware
+│   │   │   │   └── auth_middleware.go    # JWT & Role-based Auth
 │   │   │   └── routes/        # Route definitions
+│   │   │       └── routes.go
 │   │   └── persistence/       # Database layer
 │   │       ├── models/        # Database models (GORM)
+│   │       │   └── user.go
 │   │       └── repositories/  # Data access layer
+│   │           ├── user_repository.go
+│   │           ├── category_repository.go
+│   │           ├── product_repository.go
+│   │           ├── cart_repository.go
+│   │           ├── order_repository.go
+│   │           ├── transaction_repository.go
+│   │           ├── role_repository.go
+│   │           └── stats_repository.go
 │   ├── config/                # Configuration management
 │   │   ├── config.go          # App configuration
 │   │   ├── database.go        # Database setup & migration
@@ -37,16 +48,31 @@ fiber-ecommerce-api/
 │   └── core/                  # Business logic core
 │       ├── domain/            # Domain entities and interfaces
 │       │   ├── entities/      # Business entities
-│       │   └── ports/         # Interfaces (ports)
-│       │       ├── repositories/  # Repository interfaces
-│       │       └── services/      # Service interfaces
-│       └── services/          # Business logic services
+│   │   │   └── user.go
+│   │   └── ports/         # Interfaces (ports)
+│   │       ├── repositories/  # Repository interfaces
+│   │       │   └── user_repository.go
+│   │       └── services/      # Service interfaces
+│   │           └── auth_service.go
+│   └── services/          # Business logic services
+│       ├── auth_service.go
+│       ├── user_service.go
+│       ├── category_service.go
+│       ├── product_service.go
+│       ├── cart_service.go
+│       ├── order_service.go
+│       ├── payment_service.go
+│       └── stats_service.go
 ├── pkg/utils/                 # Shared utilities
 │   ├── jwt.go                 # JWT utilities
 │   ├── password.go            # Password hashing
 │   └── validator.go           # Validation utilities
 ├── docs/                      # API documentation (Swagger)
+│   ├── docs.go
+│   ├── swagger.json
+│   └── swagger.yaml
 ├── API_ENDPOINTS.md           # API endpoints documentation
+├── SEEDER_GUIDE.md           # Database seeding guide
 ├── docker-compose.yml         # Docker services
 ├── go.mod                     # Go modules
 └── go.sum                     # Go modules checksum
@@ -55,29 +81,45 @@ fiber-ecommerce-api/
 ## 🚀 Features
 
 ### 🔐 Authentication & Authorization
-- **User Registration & Login**
-- **Admin Registration**
-- **JWT Token-based Authentication**
+- **User Registration & Login** พร้อม JWT tokens
+- **Admin Registration** (เฉพาะ Admin เท่านั้น)
 - **Role-based Access Control** (Admin, User)
-- **Password Change & Reset**
+- **Password Management** (Change, Forgot, Reset)
 - **Refresh Token Support**
+- **Logout System**
 
-### 🛍️ E-commerce Features
-- **📦 Category Management** (CRUD operations)
-- **🛒 Product Management** (CRUD, search, filtering)
-- **🛍️ Shopping Cart** (Add, update, remove items)
-- **📋 Order Management** (Create, view, cancel orders)
-- **🔐 User Authentication** (Register/Login)
-- **🎫 JWT Token-based Authorization**
-- **👥 Role-based Access Control** (Admin, User, Moderator)
-- **🐘 PostgreSQL Database Integration**
-- **✅ Input Validation**
-- **🔒 Password Hashing** (bcrypt)
-- **📚 Swagger API Documentation**
-- **🌱 Database Seeding** (Auto Admin User Creation)
-- **🔄 Database Migration Control**
-- **🐳 Docker Support**
-- **🔥 Hot Reload Development** (Air)
+### 🛍️ E-commerce Core Features
+- **📦 Category Management** (CRUD operations, Pagination)
+- **🛒 Product Management** (CRUD, Search, Filter by category/price)
+- **🛍️ Shopping Cart** (Add, Update, Remove, Clear items)
+- **📋 Order Management** (Create, View, Cancel, Status tracking)
+- **💳 Payment Processing** (Create, Verify, Cancel payments)
+- **📊 Statistics & Analytics** (Sales, Products, Users stats)
+
+### 👥 User Management
+- **User CRUD Operations** (Admin only)
+- **Profile Management**
+- **User Statistics**
+- **Pagination Support**
+
+### 🛡️ Security Features
+- **JWT Token-based Authentication**
+- **Password Hashing** (bcrypt)
+- **Input Validation** (comprehensive)
+- **Role-based Route Protection**
+- **CORS Support**
+
+### 🗄️ Database Features
+- **PostgreSQL Integration**
+- **Auto Migration System**
+- **Database Seeding** (10 Categories + 20 Products)
+- **Admin User Auto-creation**
+
+### 📚 Documentation & Development
+- **Swagger API Documentation** (ภาษาไทย)
+- **Hot Reload Development** (Air)
+- **Docker Support**
+- **Comprehensive API Endpoints**
 
 ## 📋 Prerequisites
 
@@ -90,7 +132,7 @@ fiber-ecommerce-api/
 ### 1. Clone the repository
 ```bash
 git clone <repository-url>
-cd fiber-ecommerce-api
+cd fiber-ecommerce-api-day8
 ```
 
 ### 2. Install dependencies
@@ -103,17 +145,12 @@ go mod download
 # Install Air for hot reloading
 go install github.com/cosmtrek/air@latest
 
-# Install Swagger generator (optional)
+# Install Swagger generator
 go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
 ### 4. Environment Configuration
-คัดลอกไฟล์ `.env.example` เป็น `.env` และแก้ไขค่าต่างๆ ตามต้องการ:
-```bash
-cp .env.example .env
-```
-
-ตัวอย่างไฟล์ `.env`:
+สร้างไฟล์ `.env` ตามตัวอย่าง:
 ```env
 # 🌐 Environment
 APP_ENV=development
@@ -136,7 +173,7 @@ JWT_EXPIRES_IN=24h
 AUTO_MIGRATE=true
 
 # 👑 Admin User Seeding (Optional)
-ADMIN_EMAIL=admin@company.com
+ADMIN_EMAIL=admin@email.com
 ADMIN_PASSWORD=SecurePassword123!
 ADMIN_FIRST_NAME=System
 ADMIN_LAST_NAME=Administrator
@@ -163,76 +200,59 @@ docker-compose logs -f postgres
 # Run with hot reload
 air
 
-# หรือใช้ make command
-make dev
+# หรือรันโดยตรง
+go run cmd/api/main.go
 ```
 
 #### Production
 ```bash
 # Build และรัน
-make build && make run
-
-# หรือรันโดยตรง
-go run cmd/api/main.go
+go build -o bin/api cmd/api/main.go
+./bin/api
 ```
 
 🚀 **API จะรันที่**: `http://localhost:3000`
 
 ## 🗄️ Database Management
 
-### Migration Control
+### Migration & Seeding
 ```bash
+# Manual migration และ seeding
+go run cmd/migrate/main.go
+
 # Auto-migration (development)
 AUTO_MIGRATE=true go run cmd/api/main.go
 
 # Disable auto-migration (production)
 AUTO_MIGRATE=false go run cmd/api/main.go
-
-# Manual migration
-go run cmd/migrate/main.go
-
-# หรือใช้ make commands
-make migrate-up      # Manual migration
-make prod-migrate    # Production migration
-```
-
-### Admin User Seeding
-ระบบจะสร้าง admin user อัตโนมัติเมื่อ:
-- มีการตั้งค่า `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_FIRST_NAME`, `ADMIN_LAST_NAME` ใน `.env`
-- ยังไม่มี admin user ในระบบ
-
-**Log Messages:**
-```bash
-# เมื่อสร้าง admin สำเร็จ
-✅ Admin user created successfully: admin@company.com
-👤 Name: System Administrator
-⚠️  Please ensure you're using a secure password!
-
-# เมื่อไม่มี admin credentials
-⚠️  ADMIN_EMAIL not set, skipping admin user seeding
-💡 To create admin user, set ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_FIRST_NAME, ADMIN_LAST_NAME in .env
 ```
 
 ### 🌱 E-commerce Data Seeding
-ระบบจะสร้างข้อมูลตัวอย่างสำหรับ E-commerce อัตโนมัติเมื่อรัน migration:
+ระบบจะสร้างข้อมูลตัวอย่างสำหรับ E-commerce อัตโนมัติ:
 
 **ข้อมูลที่จะถูกสร้าง:**
+- **Admin User** (ถ้าตั้งค่าใน .env)
+- **2 Roles** (admin, user)
 - **10 หมวดหมู่สินค้า** (Electronics, Fashion, Home & Garden, Sports & Outdoors, Books & Media, Health & Beauty, Toys & Games, Automotive, Food & Beverages, Office Supplies)
-- **20 สินค้าตัวอย่าง** กระจายในแต่ละหมวดหมู่พร้อมรูปภาพและข้อมูลที่สมจริง
+- **20 สินค้าตัวอย่าง** พร้อมรูปภาพและข้อมูลที่สมจริง
 
-**การรัน Seeder:**
-```bash
-# รัน migration และ seed ข้อมูลพร้อมกัน
-go run cmd/migrate/main.go -up
-```
-
-**ตัวอย่างข้อมูลที่สร้าง:**
-- iPhone 15 Pro (฿39,900) - Electronics
-- เสื้อเชิ้ตผ้าคอตตอน (฿1,290) - Fashion  
+**ตัวอย่างสินค้าที่สร้าง:**
+- iPhone 15 Pro (฿42,900) - Electronics
+- MacBook Air M2 (฿35,900) - Electronics
+- เสื้อเชิ้ตผ้าคอตตอน (฿1,290) - Fashion
+- กางเกงยีนส์ (฿890) - Fashion
 - โซฟาผ้า 3 ที่นั่ง (฿15,900) - Home & Garden
 - รองเท้าวิ่ง Nike (฿3,290) - Sports & Outdoors
 
 > 📖 **ดูรายละเอียดเพิ่มเติม:** [SEEDER_GUIDE.md](./SEEDER_GUIDE.md)
+
+**Log Messages ตัวอย่าง:**
+```bash
+✅ Roles seeded successfully
+✅ Admin user created successfully: admin@email.com
+✅ Categories seeded successfully (10 categories)
+✅ Products seeded successfully (20 products)
+```
 
 ## 📚 API Documentation
 
@@ -241,39 +261,90 @@ go run cmd/migrate/main.go -up
 ### 🛣️ Available Endpoints
 
 #### 🔐 Authentication
-- `POST /api/auth/register` - สมัครสมาชิกใหม่
-- `POST /api/auth/login` - เข้าสู่ระบบ
+- `POST /api/v1/auth/register` - สมัครสมาชิกใหม่
+- `POST /api/v1/auth/login` - เข้าสู่ระบบ
+- `POST /api/v1/auth/refresh` - รีเฟรช token
+- `POST /api/v1/auth/logout` - ออกจากระบบ (Protected)
+- `POST /api/v1/auth/change-password` - เปลี่ยนรหัสผ่าน (Protected)
+- `POST /api/v1/auth/forgot-password` - ลืมรหัสผ่าน
+- `POST /api/v1/auth/reset-password` - รีเซ็ตรหัสผ่าน
+- `POST /api/v1/auth/admin/register` - สร้าง Admin ใหม่ (Admin only)
 
-#### 👤 User (Protected Routes)
-- `GET /api/user/profile` - ดูข้อมูลโปรไฟล์ผู้ใช้
+#### 👥 User Management (Admin only)
+- `GET /api/v1/users` - ดูผู้ใช้ทั้งหมด
+- `GET /api/v1/users/{id}` - ดูผู้ใช้ตาม ID
+- `PUT /api/v1/users/{id}` - แก้ไขข้อมูลผู้ใช้
+- `DELETE /api/v1/users/{id}` - ลบผู้ใช้
 
-#### 👑 Admin (Admin only)
-- `GET /api/admin/dashboard` - หน้า Admin dashboard
-- `POST /api/admin/register` - สร้างผู้ใช้ใหม่ (admin เท่านั้น)
+#### 📦 Categories
+- `GET /api/v1/categories` - ดูหมวดหมู่ทั้งหมด (Public)
+- `GET /api/v1/categories/{id}` - ดูหมวดหมู่ตาม ID (Public)
+- `POST /api/v1/categories` - สร้างหมวดหมู่ (Admin only)
+- `PUT /api/v1/categories/{id}` - แก้ไขหมวดหมู่ (Admin only)
+- `DELETE /api/v1/categories/{id}` - ลบหมวดหมู่ (Admin only)
+
+#### 🛒 Products
+- `GET /api/v1/products` - ดูสินค้าทั้งหมด (Public)
+- `GET /api/v1/products/{id}` - ดูสินค้าตาม ID (Public)
+- `GET /api/v1/products/category/{categoryId}` - ดูสินค้าตามหมวดหมู่ (Public)
+- `GET /api/v1/products/search` - ค้นหาสินค้า (Public)
+- `POST /api/v1/products` - สร้างสินค้า (Admin only)
+- `PUT /api/v1/products/{id}` - แก้ไขสินค้า (Admin only)
+- `DELETE /api/v1/products/{id}` - ลบสินค้า (Admin only)
+
+#### 🛍️ Shopping Cart (User only)
+- `GET /api/v1/cart` - ดูตะกร้าสินค้า
+- `POST /api/v1/cart` - เพิ่มสินค้าลงตะกร้า
+- `PUT /api/v1/cart/{itemId}` - อัพเดทสินค้าในตะกร้า
+- `DELETE /api/v1/cart/{itemId}` - ลบสินค้าจากตะกร้า
+- `DELETE /api/v1/cart` - ล้างตะกร้าสินค้า
+
+#### 📋 Orders (User for own orders, Admin for all)
+- `POST /api/v1/orders` - สร้างคำสั่งซื้อ
+- `GET /api/v1/orders` - ดูคำสั่งซื้อของตัวเอง
+- `GET /api/v1/orders/{id}` - ดูคำสั่งซื้อตาม ID
+- `PUT /api/v1/orders/{id}/cancel` - ยกเลิกคำสั่งซื้อ
+- `GET /api/v1/orders/admin` - ดูคำสั่งซื้อทั้งหมด (Admin only)
+- `PUT /api/v1/orders/admin/{id}/status` - อัพเดทสถานะคำสั่งซื้อ (Admin only)
+
+#### 💳 Payments (User only)
+- `POST /api/v1/payments` - สร้างการชำระเงิน
+- `POST /api/v1/payments/{id}/verify` - ยืนยันการชำระเงิน
+- `PUT /api/v1/payments/{id}/cancel` - ยกเลิกการชำระเงิน
+
+#### 📊 Statistics (Admin only)
+- `GET /api/v1/stats/sales` - ดูสถิติการขาย
+- `GET /api/v1/stats/products` - ดูสถิติสินค้า
+- `GET /api/v1/stats/users` - ดูสถิติผู้ใช้
+
+> 📖 **ดูรายละเอียดเพิ่มเติม:** [API_ENDPOINTS.md](./API_ENDPOINTS.md)
 
 ## 🔐 Authentication Flow
 
-1. **Register**: สร้างบัญชีผู้ใช้ใหม่ด้วย email, password, first name, และ last name (role = "user")
-2. **Login**: เข้าสู่ระบบด้วย email และ password เพื่อรับ JWT token
+1. **Register**: สร้างบัญชีผู้ใช้ใหม่ (role = "user")
+2. **Login**: เข้าสู่ระบบเพื่อรับ JWT token และ refresh token
 3. **Protected Routes**: ใส่ JWT token ใน `Authorization` header เป็น `Bearer <token>`
+4. **Admin Routes**: ต้องมี role = "admin"
 
 ### 💡 Example Requests
 
-#### 📝 Register
+#### 📝 Register User
 ```bash
-curl -X POST http://localhost:3000/api/auth/register \
+curl -X POST http://localhost:3000/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
     "password": "password123",
     "first_name": "John",
-    "last_name": "Doe"
+    "last_name": "Doe",
+    "phone": "0812345678",
+    "address": "123 Main St"
   }'
 ```
 
 #### 🔑 Login
 ```bash
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:3000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -281,47 +352,58 @@ curl -X POST http://localhost:3000/api/auth/login \
   }'
 ```
 
-#### 👤 Get Profile (Protected)
+#### 🛒 Add Product to Cart
 ```bash
-curl -X GET http://localhost:3000/api/user/profile \
-  -H "Authorization: Bearer <your-jwt-token>"
-```
-
-#### 👑 Admin Dashboard (Admin only)
-```bash
-curl -X GET http://localhost:3000/api/admin/dashboard \
-  -H "Authorization: Bearer <admin-jwt-token>"
-```
-
-#### 👑 Admin Register User (Admin only)
-```bash
-curl -X POST http://localhost:3000/api/admin/register \
+curl -X POST http://localhost:3000/api/v1/cart \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <admin-jwt-token>" \
+  -H "Authorization: Bearer <your-jwt-token>" \
   -d '{
-    "email": "newuser@example.com",
-    "password": "password123",
-    "first_name": "New",
-    "last_name": "User",
-    "role": "user"
+    "product_id": "product-uuid",
+    "quantity": 2
+  }'
+```
+
+#### 📋 Create Order
+```bash
+curl -X POST http://localhost:3000/api/v1/orders \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-jwt-token>" \
+  -d '{
+    "shipping_address": "123 Main St, Bangkok",
+    "payment_method": "credit_card"
   }'
 ```
 
 ## 🏛️ Project Structure Details
 
-### 🎯 Core Domain
-- `entities.User` - User entity พร้อม roles (admin, user, moderator)
-- `entities.LoginRequest` - โครงสร้าง Login request
-- `entities.RegisterRequest` - โครงสร้าง Registration request
-- `entities.Role` - User role enumeration
+### 🎯 Core Entities
+- `User` - ผู้ใช้พร้อม roles และข้อมูลส่วนตัว
+- `Category` - หมวดหมู่สินค้า
+- `Product` - สินค้าพร้อมรูปภาพและข้อมูลรายละเอียด
+- `Cart` & `CartItem` - ตะกร้าสินค้าและรายการสินค้า
+- `Order` & `OrderItem` - คำสั่งซื้อและรายการสินค้าที่สั่ง
+- `Transaction` - การชำระเงิน
+- `Role` - บทบาทผู้ใช้
 
-### ⚙️ Services
-- `services.AuthService` - Authentication business logic
-- `services.AuthServiceImpl` - Authentication service implementation
+### ⚙️ Services (Business Logic)
+- `AuthService` - Authentication และ Authorization
+- `UserService` - การจัดการผู้ใช้
+- `CategoryService` - การจัดการหมวดหมู่
+- `ProductService` - การจัดการสินค้า
+- `CartService` - การจัดการตะกร้าสินค้า
+- `OrderService` - การจัดการคำสั่งซื้อ
+- `PaymentService` - การจัดการการชำระเงิน
+- `StatsService` - การจัดการสถิติ
 
-### 🗄️ Repositories
-- `repositories.UserRepository` - User data access interface
-- `repositories.UserRepositoryImpl` - GORM implementation
+### 🗄️ Repositories (Data Access)
+- `UserRepository` - การเข้าถึงข้อมูลผู้ใช้
+- `CategoryRepository` - การเข้าถึงข้อมูลหมวดหมู่
+- `ProductRepository` - การเข้าถึงข้อมูลสินค้า
+- `CartRepository` - การเข้าถึงข้อมูลตะกร้า
+- `OrderRepository` - การเข้าถึงข้อมูลคำสั่งซื้อ
+- `TransactionRepository` - การเข้าถึงข้อมูลการชำระเงิน
+- `RoleRepository` - การเข้าถึงข้อมูลบทบาท
+- `StatsRepository` - การเข้าถึงข้อมูลสถิติ
 
 ### 🔧 Utilities
 - `utils.ValidateStruct` - ตรวจสอบความถูกต้องของ struct
@@ -330,37 +412,30 @@ curl -X POST http://localhost:3000/api/admin/register \
 - `utils.GenerateJWT` - สร้าง JWT token
 - `utils.ParseJWT` - แปลง JWT token
 
-### ⚙️ Configuration
-- `config.LoadConfig` - โหลด environment configuration
-- `config.SetupDatabase` - ตั้งค่าการเชื่อมต่อฐานข้อมูล
-- `config.SeedAdminUser` - สร้าง admin user อัตโนมัติ
-
 ### 🛡️ Middleware
-- `middleware.AuthMiddleware` - JWT authentication middleware
-- `middleware.RequireRole` - Role-based authorization middleware
+- `AuthRequired()` - ตรวจสอบ JWT token
+- `AdminRequired()` - ตรวจสอบ admin role
+- `RoleRequired(roles...)` - ตรวจสอบ roles ที่กำหนด
 
 ## 🔧 Development Tools
 
 ### 🔥 Hot Reload
-โปรเจ็กต์ใช้ [Air](https://github.com/cosmtrek/air) สำหรับ hot reloading ระหว่างการพัฒนา ดูการตั้งค่าได้ที่ `.air.toml`
+โปรเจ็กต์ใช้ [Air](https://github.com/cosmtrek/air) สำหรับ hot reloading ระหว่างการพัฒนา
 
-### 🛠️ Make Commands
+### 📚 Swagger Documentation
+สร้าง/อัพเดท Swagger documentation:
 ```bash
-make help          # แสดงคำสั่งที่ใช้ได้ทั้งหมด
-make build         # Build แอปพลิเคชัน
-make run           # รันแอปพลิเคชัน
-make dev           # รันแบบ development mode (hot reload)
-make test          # รัน tests
-make clean         # ลบไฟล์ build
-make deps          # ดาวน์โหลด dependencies
-make migrate-up    # รัน database migration
-make prod-migrate  # รัน production migration
+swag init -g cmd/api/main.go -o docs
 ```
 
-### 🗄️ Database Migration
-- **Development**: Auto-migration เปิดใช้งานโดยค่าเริ่มต้น
-- **Production**: ต้องตั้งค่า `AUTO_MIGRATE=true` หรือใช้ manual migration
-- **Manual Control**: ใช้ `cmd/migrate/main.go` หรือ make commands
+### 🛠️ Make Commands (ถ้ามี Makefile)
+```bash
+make build         # Build แอปพลิเคชัน
+make run           # รันแอปพลิเคชัน
+make dev           # รันแบบ development mode
+make test          # รัน tests
+make migrate       # รัน database migration
+```
 
 ## 🛠️ Tech Stack
 
@@ -378,7 +453,6 @@ make prod-migrate  # รัน production migration
 - **Air** - Hot reload สำหรับ Go
 - **Swagger** - API documentation
 - **Docker** - Containerization
-- **Make** - Build automation
 
 ## 🐳 Docker Support
 
@@ -409,9 +483,6 @@ go test -cover ./...
 
 # Run tests with verbose output
 go test -v ./...
-
-# หรือใช้ make command
-make test
 ```
 
 ## 📝 API Response Format
@@ -419,16 +490,20 @@ make test
 ### ✅ Success Response
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": 1,
-    "email": "user@example.com",
-    "first_name": "John",
-    "last_name": "Doe",
-    "role": "user",
-    "is_active": true,
-    "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+  "success": true,
+  "message": "ดึงข้อมูลสินค้าสำเร็จ",
+  "data": {
+    "id": "uuid",
+    "name": "iPhone 15 Pro",
+    "price": 42900,
+    "stock": 10,
+    "category_id": "uuid"
+  },
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 20,
+    "total_pages": 2
   }
 }
 ```
@@ -436,7 +511,9 @@ make test
 ### ❌ Error Response
 ```json
 {
-  "error": "Invalid email or password"
+  "success": false,
+  "message": "ไม่พบสินค้า",
+  "error": "Product not found"
 }
 ```
 
@@ -445,77 +522,41 @@ make test
 ### Production Build
 ```bash
 # Build for production
-make build
+go build -o bin/api cmd/api/main.go
 
-# Run production build
+# Set production environment
+export APP_ENV=production
+export AUTO_MIGRATE=false
+
+# Run
 ./bin/api
 ```
 
-### Environment Variables for Production
-สำคัญสำหรับ production:
-
-```env
-# ต้องตั้งค่าให้ปลอดภัย
-APP_ENV=production
-JWT_SECRET=your-super-secure-jwt-secret-at-least-32-characters-long
-DB_PASS=your-secure-database-password
-
-# Database SSL
-DB_SSL=require
-
-# Migration control
-AUTO_MIGRATE=false
-
-# Admin credentials (ต้องตั้งค่า)
-ADMIN_EMAIL=admin@yourcompany.com
-ADMIN_PASSWORD=YourSecureAdminPassword123!
-ADMIN_FIRST_NAME=System
-ADMIN_LAST_NAME=Administrator
-```
-
-### Production Checklist
-- [ ] เปลี่ยน `JWT_SECRET` เป็นค่าที่ปลอดภัย (อย่างน้อย 32 ตัวอักษร)
-- [ ] ตั้งค่า database credentials ที่ถูกต้อง
-- [ ] เปลี่ยน `APP_ENV` เป็น `production`
-- [ ] เปิดใช้งาน SSL สำหรับ database (`DB_SSL=require`)
-- [ ] ตั้งค่า admin credentials ที่ปลอดภัย
-- [ ] ปิด auto-migration (`AUTO_MIGRATE=false`)
-- [ ] รัน manual migration ก่อน deploy
-
-## 🔒 Security Features
-
-### Password Security
-- **bcrypt hashing** - รหัสผ่านถูกเข้ารหัสด้วย bcrypt
-- **Minimum length** - รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร
-- **Admin password** - รหัสผ่าน admin ต้องมีอย่างน้อย 8 ตัวอักษร
-
-### JWT Security
-- **Secure secret** - JWT secret ต้องมีอย่างน้อย 32 ตัวอักษรใน production
-- **Token expiration** - Token หมดอายุใน 24 ชั่วโมง (ปรับได้)
-- **Role-based access** - ตรวจสอบ role ในทุก protected route
-
-### Database Security
-- **SSL connection** - แนะนำให้ใช้ SSL ใน production
-- **Environment variables** - ข้อมูลสำคัญเก็บใน environment variables
-- **No default passwords** - ไม่มีรหัสผ่าน default ใน production
-
-## 🤝 Contributing
-
-1. ทำตามหลักการ Clean Architecture
-2. รักษาโครงสร้างโปรเจ็กต์ที่มีอยู่
-3. เพิ่ม error handling และ validation ที่เหมาะสม
-4. อัปเดต documentation สำหรับ features ใหม่
-5. เขียน tests สำหรับ functionality ใหม่
-6. ใช้ make commands สำหรับ development
+### Environment Variables
+สำหรับ production ให้ตั้งค่า:
+- `APP_ENV=production`
+- `AUTO_MIGRATE=false`
+- `JWT_SECRET=<strong-secret>`
+- Database credentials
 
 ## 📄 License
 
-This project is licensed under the Apache 2.0 License.
+This project is licensed under the MIT License.
 
-## 👥 Author
+## 🤝 Contributing
 
-- **Samit Koyom** - [iamsamitdev](https://github.com/iamsamitdev)
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📞 Support
+
+หากมีปัญหาหรือข้อสงสัย สามารถติดต่อได้ที่:
+- Email: support@example.com
+- GitHub Issues: [Create an issue](https://github.com/your-repo/issues)
 
 ---
 
-🎉 **Happy Coding!** หากมีคำถามหรือปัญหาใดๆ สามารถสร้าง issue ได้เลยครับ
+⭐ **ถ้าโปรเจ็กต์นี้มีประโยชน์ กรุณาให้ Star ด้วยนะครับ!**
