@@ -28,6 +28,9 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
+	// Setup database connection
+	db := config.SetupDatabase(cfg)
+
 	if *up {
 		log.Println("Running database migrations...")
 		err := config.RunMigrationManual(cfg)
@@ -35,6 +38,13 @@ func main() {
 			log.Fatalf("Migration failed: %v", err)
 		}
 		log.Println("Migration completed successfully!")
+
+		// Seed database after migration
+		log.Println("Seeding database...")
+		if err := config.SeedDatabase(db, cfg); err != nil {
+			log.Fatalf("Failed to seed database: %v", err)
+		}
+		log.Println("🎉 All database operations completed successfully!")
 	}
 
 	if *down {

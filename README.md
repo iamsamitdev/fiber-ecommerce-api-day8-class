@@ -1,6 +1,6 @@
 # 🛒 Fiber E-commerce API
 
-Authentication API with Role-based Access Control built with Go Fiber framework using Clean Architecture principles.
+ระบบ E-commerce API ที่สมบูรณ์แบบ พัฒนาด้วย Go Fiber framework โดยใช้หลักการ Clean Architecture รองรับการจัดการสินค้า, ตะกร้าสินค้า, คำสั่งซื้อ, และการชำระเงิน
 
 ## 🏗️ Architecture
 
@@ -17,6 +17,14 @@ fiber-ecommerce-api/
 │   ├── adapters/              # External adapters
 │   │   ├── http/              # HTTP layer (handlers, middleware, routes)
 │   │   │   ├── handlers/      # HTTP request handlers
+│   │   │   │   ├── auth_handler.go       # Authentication
+│   │   │   │   ├── user_handler.go       # User management
+│   │   │   │   ├── category_handler.go   # Category management
+│   │   │   │   ├── product_handler.go    # Product management
+│   │   │   │   ├── cart_handler.go       # Shopping cart
+│   │   │   │   ├── order_handler.go      # Order management
+│   │   │   │   ├── payment_handler.go    # Payment processing
+│   │   │   │   └── stats_handler.go      # Statistics
 │   │   │   ├── middleware/    # HTTP middleware
 │   │   │   └── routes/        # Route definitions
 │   │   └── persistence/       # Database layer
@@ -25,7 +33,7 @@ fiber-ecommerce-api/
 │   ├── config/                # Configuration management
 │   │   ├── config.go          # App configuration
 │   │   ├── database.go        # Database setup & migration
-│   │   └── seeder.go          # Database seeding (Admin user)
+│   │   └── seeder.go          # Database seeding
 │   └── core/                  # Business logic core
 │       ├── domain/            # Domain entities and interfaces
 │       │   ├── entities/      # Business entities
@@ -38,20 +46,27 @@ fiber-ecommerce-api/
 │   ├── password.go            # Password hashing
 │   └── validator.go           # Validation utilities
 ├── docs/                      # API documentation (Swagger)
-├── scripts/                   # Utility scripts
-├── tmp/                       # Temporary build files
-├── .env                       # Environment variables (local)
-├── .env.example               # Environment variables template
-├── .gitignore                 # Git ignore rules
-├── .air.toml                  # Hot reload configuration
+├── API_ENDPOINTS.md           # API endpoints documentation
 ├── docker-compose.yml         # Docker services
-├── Makefile                   # Build commands
 ├── go.mod                     # Go modules
 └── go.sum                     # Go modules checksum
 ```
 
 ## 🚀 Features
 
+### 🔐 Authentication & Authorization
+- **User Registration & Login**
+- **Admin Registration**
+- **JWT Token-based Authentication**
+- **Role-based Access Control** (Admin, User)
+- **Password Change & Reset**
+- **Refresh Token Support**
+
+### 🛍️ E-commerce Features
+- **📦 Category Management** (CRUD operations)
+- **🛒 Product Management** (CRUD, search, filtering)
+- **🛍️ Shopping Cart** (Add, update, remove items)
+- **📋 Order Management** (Create, view, cancel orders)
 - **🔐 User Authentication** (Register/Login)
 - **🎫 JWT Token-based Authorization**
 - **👥 Role-based Access Control** (Admin, User, Moderator)
@@ -197,6 +212,27 @@ make prod-migrate    # Production migration
 ⚠️  ADMIN_EMAIL not set, skipping admin user seeding
 💡 To create admin user, set ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_FIRST_NAME, ADMIN_LAST_NAME in .env
 ```
+
+### 🌱 E-commerce Data Seeding
+ระบบจะสร้างข้อมูลตัวอย่างสำหรับ E-commerce อัตโนมัติเมื่อรัน migration:
+
+**ข้อมูลที่จะถูกสร้าง:**
+- **10 หมวดหมู่สินค้า** (Electronics, Fashion, Home & Garden, Sports & Outdoors, Books & Media, Health & Beauty, Toys & Games, Automotive, Food & Beverages, Office Supplies)
+- **20 สินค้าตัวอย่าง** กระจายในแต่ละหมวดหมู่พร้อมรูปภาพและข้อมูลที่สมจริง
+
+**การรัน Seeder:**
+```bash
+# รัน migration และ seed ข้อมูลพร้อมกัน
+go run cmd/migrate/main.go -up
+```
+
+**ตัวอย่างข้อมูลที่สร้าง:**
+- iPhone 15 Pro (฿39,900) - Electronics
+- เสื้อเชิ้ตผ้าคอตตอน (฿1,290) - Fashion  
+- โซฟาผ้า 3 ที่นั่ง (฿15,900) - Home & Garden
+- รองเท้าวิ่ง Nike (฿3,290) - Sports & Outdoors
+
+> 📖 **ดูรายละเอียดเพิ่มเติม:** [SEEDER_GUIDE.md](./SEEDER_GUIDE.md)
 
 ## 📚 API Documentation
 

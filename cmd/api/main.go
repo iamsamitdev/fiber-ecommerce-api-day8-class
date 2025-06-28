@@ -11,7 +11,7 @@
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host localhost:3000
-// @BasePath /
+// @BasePath /api/v1
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
@@ -23,11 +23,9 @@ import (
 
 	_ "github.com/iamsamitdev/fiber-ecommerce-api/docs"
 
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/iamsamitdev/fiber-ecommerce-api/internal/adapters/http/handlers"
+	"github.com/iamsamitdev/fiber-ecommerce-api/internal/adapters/http/middleware"
 	"github.com/iamsamitdev/fiber-ecommerce-api/internal/adapters/http/routes"
 	"github.com/iamsamitdev/fiber-ecommerce-api/internal/adapters/persistence/repositories"
 	"github.com/iamsamitdev/fiber-ecommerce-api/internal/config"
@@ -35,7 +33,6 @@ import (
 )
 
 func main() {
-
 	// Load configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
@@ -47,12 +44,39 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repositories.NewUserRepository(db)
+	roleRepo := repositories.NewRoleRepository(db)
+
+	categoryRepo := repositories.NewCategoryRepository(db)
+	productRepo := repositories.NewProductRepository(db)
+	cartRepo := repositories.NewCartRepository(db)
+	orderRepo := repositories.NewOrderRepository(db)
+	transactionRepo := repositories.NewTransactionRepository(db)
+	statsRepo := repositories.NewStatsRepository(db)
 
 	// Initialize services
-	authService := services.NewAuthService(userRepo)
+	authService := services.NewAuthService(userRepo, roleRepo)
+	userService := services.NewUserService(userRepo)
+	categoryService := services.NewCategoryService(categoryRepo)
+	productService := services.NewProductService(productRepo)
+	cartService := services.NewCartService(cartRepo)
+	orderService := services.NewOrderService(orderRepo)
+	paymentService := services.NewPaymentService(transactionRepo)
+	statsService := services.NewStatsService(statsRepo)
+
+	// Initialize middleware
+	authMW := middleware.NewAuthMiddleware(cfg.JWTSecret)
 
 	// Initialize handlers
-	authHandler := handlers.NewAuthHandler(authService)
+	authHandler := handlers.NewAuthHandler(authService, userService)
+	userHandler := handlers.NewUserHandler(userService)
+
+	// เพิ่ม handlers อื่นๆ
+	categoryHandler := handlers.NewCategoryHandler(categoryService)
+	productHandler := handlers.NewProductHandler(productService)
+	cartHandler := handlers.NewCartHandler(cartService)
+	orderHandler := handlers.NewOrderHandler(orderService)
+	paymentHandler := handlers.NewPaymentHandler(paymentService)
+	statsHandler := handlers.NewStatsHandler(statsService)
 
 	// Initialize Fiber app
 	app := fiber.New(fiber.Config{
@@ -63,12 +87,19 @@ func main() {
 		},
 	})
 
-	// Middleware
-	app.Use(logger.New())
-	app.Use(cors.New())
-
-	// Setup routes
-	routes.SetupRoutes(app, authHandler)
+	// Initialize routes
+	routes := routes.NewRoutes(
+		authHandler,
+		userHandler,
+		categoryHandler,
+		productHandler,
+		cartHandler,
+		orderHandler,
+		paymentHandler,
+		statsHandler,
+		authMW,
+	)
+	routes.SetupRoutes(app)
 
 	// Start server
 	log.Printf("Server starting on port %s", cfg.AppPort)
