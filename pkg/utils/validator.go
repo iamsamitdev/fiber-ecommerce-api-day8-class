@@ -2,12 +2,17 @@ package utils
 
 import (
 	"errors"
-	
+
 	"github.com/go-playground/validator/v10"
 )
 
 // สร้างตัวแปร validate สำหรับการตรวจสอบความถูกต้องของข้อมูล
 var validate = validator.New()
+
+// สร้างฟังก์ชัน Validate ที่ใช้สำหรับตรวจสอบความถูกต้องของข้อมูล
+func ValidateStruct(s interface{}) error {
+	return validate.Struct(s)
+}
 
 // init function จะทำงานเมื่อ package ถูกโหลด
 func init() {
@@ -19,11 +24,6 @@ func init() {
 func validatePasswordComplex(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
 	return IsValidPassword(password)
-}
-
-// สร้างฟังก์ชัน Validate ที่ใช้สำหรับตรวจสอบความถูกต้องของข้อมูล
-func ValidateStruct(s interface{}) error {
-	return validate.Struct(s)
 }
 
 // ValidatePassword ตรวจสอบรหัสผ่านและคืนค่า error message ที่เหมาะสม

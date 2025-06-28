@@ -9,7 +9,6 @@ definitions:
       last_name:
         type: string
       password:
-        minLength: 6
         type: string
       role:
         allOf:
@@ -30,7 +29,7 @@ definitions:
       email:
         type: string
       password:
-        minLength: 6
+        minLength: 8
         type: string
     required:
     - email
@@ -52,7 +51,6 @@ definitions:
       last_name:
         type: string
       password:
-        minLength: 6
         type: string
     required:
     - email

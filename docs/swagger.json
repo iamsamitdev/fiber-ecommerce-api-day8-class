@@ -296,8 +296,7 @@
                     "type": "string"
                 },
                 "password": {
-                    "type": "string",
-                    "minLength": 6
+                    "type": "string"
                 },
                 "role": {
                     "enum": [
@@ -325,7 +324,7 @@
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 6
+                    "minLength": 8
                 }
             }
         },
@@ -359,8 +358,7 @@
                     "type": "string"
                 },
                 "password": {
-                    "type": "string",
-                    "minLength": 6
+                    "type": "string"
                 }
             }
         },
